@@ -21,4 +21,10 @@ public class GenreDto {
     private String description;
     @Schema(description = "Список фильмов этого жанра")
     private List<MovieDto> movieList;
+
+    public GenreDto(int id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 }

@@ -37,7 +37,7 @@ public class CriticCriteriaRepository {
         return new PageImpl<>(dtoList,pageable,dtoList.size());
     }
 
-    private Pageable getPageable(CriticPage page) {
+    public Pageable getPageable(CriticPage page) {
         Sort sort = Sort.by(page.getSortDirection(), page.getSortBy());
         return PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
     }

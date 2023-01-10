@@ -28,4 +28,10 @@ public class MovieDto {
     @Schema(description = "Рецензии")
     /*private List<GenreDto> genreList;*/
     private List<ReviewDto> reviewList;
+
+    public MovieDto(int id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 }

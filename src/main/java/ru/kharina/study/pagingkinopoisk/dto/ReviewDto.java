@@ -17,4 +17,10 @@ public class ReviewDto {
     private Date date;
     private CriticDto critic;
     private MovieDto movie;
+
+    public ReviewDto(int id, int score, String message) {
+        this.id = id;
+        this.score = score;
+        this.message = message;
+    }
 }

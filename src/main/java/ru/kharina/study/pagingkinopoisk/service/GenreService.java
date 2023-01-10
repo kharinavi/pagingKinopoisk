@@ -52,8 +52,9 @@ public class GenreService {
     }
 
     //DELETE по id
-    public void deleteGenreById(int id) {
+    public boolean deleteGenreById(int id) {
         genreRepository.deleteById(id);
+        return true;
     }
 
 }

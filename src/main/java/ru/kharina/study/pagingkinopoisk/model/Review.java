@@ -35,5 +35,11 @@ public class Review {
     @ManyToOne(optional=false)
     @JoinColumn(name = "movie_id")
     private Movie movie;
+
+    public Review(int id, int score, String message) {
+        this.id = id;
+        this.score = score;
+        this.message = message;
+    }
 }
 

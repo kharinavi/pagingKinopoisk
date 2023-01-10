@@ -87,7 +87,8 @@ public class MovieService {
     }
 
     //DELETE по id
-    public void deleteMovieById(int id) {
+    public boolean deleteMovieById(int id) {
         movieRepository.deleteById(id);
+        return true;
     }
 }

@@ -57,7 +57,9 @@ public class CriticService {
     }
 
     //DELETE по id
-    public void deleteCriticById(int id) {
+    public boolean deleteCriticById(int id) {
+
         criticRepository.deleteById(id);
+        return true;
     }
 }

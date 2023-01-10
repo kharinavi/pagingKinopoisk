@@ -50,7 +50,6 @@ public class ReviewService {
     }
 
     public ReviewDto addReviewDto(ReviewDto reviewDto) {
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         reviewRepository.save(convertDtoToEntity(reviewDto));
         Movie movie = movieRepository.getOne(reviewDto.getMovie().getId());
         List<Review> reviewList = movie.getReviewList();
@@ -82,7 +81,8 @@ public class ReviewService {
     }
 
     //DELETE по id
-    public void deleteReviewById(int id) {
+    public boolean deleteReviewById(int id) {
         reviewRepository.deleteById(id);
+        return true;
     }
 }
