@@ -32,7 +32,6 @@ public class ReviewController {
     @ApiOperation(value = "Сохранение рецензии")
     @PostMapping
     public ResponseEntity<ReviewDto> addReview(@RequestBody ReviewDto review){
-        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^");
         return new ResponseEntity<>(reviewService.addReviewDto(review), HttpStatus.OK);
     }
 

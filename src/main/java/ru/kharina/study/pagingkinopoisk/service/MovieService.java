@@ -31,7 +31,7 @@ public class MovieService {
         return movieCriteriaRepository.findAllWithFilters(page, movieSearchCriteria,movie);
     }
 
-    public ru.kharina.study.pagingkinopoisk.model.Movie addMovie(ru.kharina.study.pagingkinopoisk.model.Movie movie){
+    public Movie addMovie(Movie movie){
         return movieRepository.save(movie);
     }
 

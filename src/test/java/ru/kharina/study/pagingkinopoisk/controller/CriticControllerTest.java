@@ -1,11 +1,15 @@
 package ru.kharina.study.pagingkinopoisk.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
@@ -14,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.kharina.study.pagingkinopoisk.dto.CriticDto;
 import ru.kharina.study.pagingkinopoisk.model.Critic;
 import ru.kharina.study.pagingkinopoisk.model.CriticPage;
 import ru.kharina.study.pagingkinopoisk.repository.CriticCriteriaRepository;
@@ -21,6 +26,7 @@ import ru.kharina.study.pagingkinopoisk.repository.CriticRepository;
 import ru.kharina.study.pagingkinopoisk.service.CriticService;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,70 +35,96 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@WebMvcTest(CriticController.class)
 public class CriticControllerTest {
-    private static final ObjectMapper om = new ObjectMapper();
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private CriticRepository mockRepository;
-    @MockBean
-    private CriticCriteriaRepository mockCriteriaRepository;
-    @MockBean
-    private CriticService mockService;
+    private CriticService criticService;
 
-    @Before
-    public void init() {
+    CriticDto criticDtoOne;
+    CriticDto criticDtoTwo;
+    Critic critic;
+    List<CriticDto> criticList = new ArrayList<>();
+
+    @BeforeEach
+    void init() {
+        critic = new Critic(1,"firstName","lastName","description");
+        criticDtoOne = new CriticDto(1,"firstName","lastName","description");
+        criticDtoTwo = new CriticDto(2,"firstName2","lastName2","description2");
+        criticList.add(criticDtoOne);
+        criticList.add(criticDtoTwo);
+    }
+
+    @Test
+    void testGetCriticDtoById() throws Exception{
+        when(criticService.getCriticById(1)).thenReturn(criticDtoOne);
+
+        this.mockMvc.perform(get("/critic/1"))
+                .andDo(print()).andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetCritics() throws Exception {
+
         CriticPage criticPage = new CriticPage();
-        //when(mockRepository.findById(1)).thenReturn(Optional.of(critic));
+        Page page = new PageImpl<>(criticList,
+                PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC,"lastName")),
+                criticList.size());
+
+        when(criticService.getCritics(criticPage)).thenReturn(page);
+
+        this.mockMvc.perform(get("/critic"))
+                .andDo(print()).andExpect(status().isOk());
     }
 
     @Test
-    public void find_allCritic_OK() throws Exception {
+    void testAddCritic() throws Exception {
 
-        /*CriticPage criticPage = new CriticPage();
-        List<Critic> critics = Arrays.asList(
-                new Critic(1,"Book A", "Ah Pig", "description1"),
-                new Critic(2, "Book B", "Ah Dog", "description2"));
-        Sort sort = Sort.by(criticPage.getSortDirection(), criticPage.getSortBy());
-        Pageable pageable = PageRequest.of(criticPage.getPageNumber(), criticPage.getPageSize(), sort);
-        Page<Critic> pageCritics = new PageImpl<Critic>(critics, pageable, 2);;
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = objectWriter.writeValueAsString(criticDtoOne);
 
-        when(mockService.getCritics(criticPage)).thenReturn(pageCritics);
+        when(criticService.addCriticDto(criticDtoOne)).thenReturn(critic);
 
-        mockMvc.perform(get("/critic"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        this.mockMvc.perform(post("/critic")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andDo(print())
                 .andExpect(status().isOk());
-
-        verify(mockRepository, times(1)).findAll();*/
     }
 
     @Test
-    public void save_critic_OK() throws Exception {
+    void testUpdateCritic() throws Exception {
 
-        Critic newCritic = new Critic(1,"Spring Boot Guide", "mkyong", "description");
-        when(mockRepository.save(any(Critic.class))).thenReturn(newCritic);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = objectWriter.writeValueAsString(criticDtoTwo);
 
-        mockMvc.perform(post("/critic")
-                        .content(om.writeValueAsString(newCritic))
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
-                /*.andDo(print())*/
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.name", is("Spring Boot Guide")))
-                .andExpect(jsonPath("$.author", is("mkyong")))
-                .andExpect(jsonPath("$.price", is("description")));
+        when(criticService.updateCritic(criticDtoTwo,1)).thenReturn(criticDtoTwo);
 
-        verify(mockRepository, times(1)).save(any(Critic.class));
+        this.mockMvc.perform(put("/critic/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testDeleteCritic() throws Exception {
+
+        when(criticService.deleteCriticById(1)).thenReturn(true);
+
+        this.mockMvc.perform(delete("/critic/1"))
+                .andDo(print()).andExpect(status().isOk());
 
     }
 }

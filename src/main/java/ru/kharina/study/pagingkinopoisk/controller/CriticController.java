@@ -32,8 +32,8 @@ public class CriticController {
     }
 
     @GetMapping("/{id}")
-    CriticDto getCriticDtoById(@PathVariable int id) {
-        return criticService.getCriticById(id);
+    public ResponseEntity<CriticDto> getCriticDtoById(@PathVariable int id) {
+        return new ResponseEntity<>(criticService.getCriticById(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
